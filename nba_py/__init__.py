@@ -85,11 +85,29 @@ def _get_json(endpoint, params, referer='scores'):
     """
     h = dict(HEADERS)
     h['referer'] = 'http://stats.nba.com/{ref}/'.format(ref=referer)
+
+    proxies = _get_nba_proxies()
+
     _get = get(BASE_URL.format(endpoint=endpoint), params=params,
-               headers=h)
+               headers=h, proxies=proxies)
+
     # print _get.url
     _get.raise_for_status()
     return _get.json()
+
+def _get_nba_proxies():
+    """
+    Internal method to retrieve HTTP / HTTPS proxies from environment, if they're set
+    """
+    http_proxy = os.environ.get('NBA_HTTP_PROXY')
+    https_proxy = os.environ.get('NBA_HTTPS_PROXY')
+
+    if http_proxy is None or https_proxy is None:
+        return None
+    return {
+        'http': http_proxy,
+        'https': https_proxy
+    }
 
 
 class Scoreboard:
